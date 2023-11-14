@@ -144,7 +144,7 @@ h1.title {
   margin-bottom: 36px;
   @apply border-b pb-12 font-bold
 }
-h1 {
+h1.heading {
   font-size: 2.25rem; /* 36px */
   line-height: 2.5rem; /* 40px */
   font-weight: 700;
