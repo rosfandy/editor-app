@@ -144,19 +144,6 @@ export default {
     },
   },
   created() {
-    // this.provider = new HocuspocusProvider({
-    //   url: 'http://127.0.0.1:1999',
-    //   // url: 'wss://editorhocus.oriens.my.id',
-    //   name: 'testing',
-    //   document: ydoc,
-    //   token: 'test-token',
-    // })
-    // this.provider = new Provider(
-    //   // "volume-other.rosfandy.partykit.dev",
-    //   "localhost:1999",
-    //   "test-room",
-    //   ydoc
-    // );
     this.provider = new TiptapCollabProvider({
       appId: 'jkv85lmx', // get this at collab.tiptap.dev
       name: 'collabDocs', // e.g. a uuid uuidv4();
@@ -196,4 +183,5 @@ h3 {
   font-weight: 700;
 }
 
-@import "style.css"</style>
+@import "style.css"
+</style>
