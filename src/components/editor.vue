@@ -1,18 +1,42 @@
 <!-- eslint-disable  -->
 <template>
-  <div class="flex">
-    <div class="absolute top-20 left-4 w-[15%]">
-      <div class="">Online: {{ total }}</div>
-      <div>Status: {{ status }}</div>
-      <div>Your Name: {{ currentUser.name }}</div>
-      <div class="my-4">
-        <button class="bg-gray-200 border border-black px-2" @click="gantiNama">
-          Ganti Nama
-        </button>
+  <div class="w-full min-h-screen">
+    <navbar :users="users"></navbar>
+    <div class="flex">
+      <div class="absolute hidden lg:inline border rounded bg-white shadow p-4 top-20 left-4 ">
+        <div class=" text-green-400 font-semibold">Online: {{ total }}</div>
+        <div class="font-semibold text-zinc-700">Status: {{ status }}</div>
+        <div class="font-semibold text-zinc-700">Name: {{ currentUser.name }}</div>
+        <div class="my-4">
+          <button class="w-full bg-[#FC881D] text-white rounded text-sm py-1 px-2" @click="gantiNama">
+            Change Name
+          </button>
+        </div>
+        <div class="">
+          <button class="bg-[#FC881D] text-white rounded text-sm py-1 px-2 w-full"
+            @click="updateCurrentUser({ avatar: getRandomAvatar() })">
+            Random Avatar
+          </button>
+        </div>
       </div>
-    </div>
-    <div v-if="editor" class="editor-canvas w-full">
-      <editor-content :editor="editor" />
+      <div v-if="editor" class="editor-canvas md:px-[20%] w-full flex flex-col bg-gray-50 py-8 min-h-screen">
+        <div class="bg-white min-h-screen shadow border lg:px-16 px-4 py-20 lg:py-32 w-full ">
+          <FloatingMenu v-if="editor" :should-show="shouldShowMainToolbar" :editor="editor" :class="{
+            'mouse:pointer-events-none mouse:opacity-0': isTyping,
+          }" :tippy-options=floatingTippy>
+            <div v-if="topLevelNodeType !== 'title' && topLevelNodeType !== 'loading'" class="flex flex-row">
+              <button class="ml-1 my-2 hover:bg-slate-100 rounded">
+                <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true"
+                  focusable="false" class="w-5 h-5 md:w-6 md:h-6">
+                  <path d="M8 7h2V5H8v2zm0 6h2v-2H8v2zm0 6h2v-2H8v2zm6-14v2h2V5h-2zm0 8h2v-2h-2v2zm0 6h2v-2h-2v2z">
+                  </path>
+                </svg>
+              </button>
+            </div>
+          </FloatingMenu>
+          <editor-content :editor="editor" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -24,23 +48,40 @@ import { HocuspocusProvider, TiptapCollabProvider } from '@hocuspocus/provider'
 import * as Y from 'yjs'
 import Collaboration from '@tiptap/extension-collaboration'
 import CollaborationCursor from './extensions/collaborationCursor'
-import Provider from "y-partykit/provider";
+import {
+  DragNode,
+  GetTopLevelBlockCoords,
+  GetTopLevelNode,
+} from './utils/pm-utils.js'
+import { mergeArrays } from './utils/utils'
+import defaultBlockTools from './tools/block-tools'
 
 import { uuid } from 'vue-uuid';
 
-import { Editor, EditorContent } from '@tiptap/vue-3'
+import { Editor, EditorContent, FloatingMenu } from '@tiptap/vue-3'
 import TextAlign from '@tiptap/extension-text-align'
 import defaultExtension from './extensions'
+import Navbar from './Navbar.vue';
 
 const ydoc = new Y.Doc()
 const RandomColor = list => list[Math.floor(Math.random() * list.length)]
 const RandomAvatar = list => list[Math.floor(Math.random() * list.length)]
 
 export default {
+  props: {
+    editorClass: {
+      type: String,
+    },
+    blockTools: {
+      type: Array,
+      default: () => [],
+    },
+  },
   components: {
     EditorContent,
+    Navbar,
+    FloatingMenu
   },
-
   data() {
     return {
       editor: null,
@@ -51,12 +92,45 @@ export default {
         color: this.getRandomColor(),
         avatar: this.getRandomAvatar(),
       },
+      floatingTippy: {
+        maxWidth: '350',
+        placement: 'left-start',
+        animation: 'fade',
+        duration: 300,
+        getReferenceClientRect: this.getMenuCoords,
+        onCreate: instance => instance.popper.classList.add(
+          'max-md:!sticky',
+          'max-md:!bottom-0',
+          'max-md:!top-auto',
+          'max-md:!transform-none',
+        ),
+      },
+      topLevelNodeType: null,
+      currentBlockTool: null,
       total: 0,
-      users: '',
+      dragging: false,
+      draggedNodePosition: null,
+      users: [],
       status: 'disconnect',
+      allBlockTools: mergeArrays(defaultBlockTools(), this.blockTools),
     }
   },
-
+  computed: {
+    activeAlignmentTools() {
+      if (this.topLevelNodeType) {
+        return this.allAlignmentTools.filter(alignmentToolGroup => alignmentToolGroup.find(tool => tool.isActiveTest(this.editor, this.topLevelNodeType)))
+      }
+      return null
+    },
+  },
+  watch: {
+    isEditable(value) {
+      this.editor.setEditable(value)
+    },
+    topLevelNodeType() {
+      this.currentBlockTool = this.getCurrentBlockTool()
+    },
+  },
   mounted() {
     this.editor = new Editor({
       extensions: [
@@ -73,13 +147,17 @@ export default {
           user: this.currentUser,
         }),
       ],
+      onUpdate: () => {
+        this.updateToolbar()
+      },
+      onSelectionUpdate: () => {
+        this.updateToolbar()
+      },
     })
     this.provider.awareness.on('change', () => {
-      // this.awareness = this.filterUsers(this.provider.awareness.getStates())
-      this.awareness = this.provider.awareness.getStates()
+      this.awareness = this.filterUsers(this.provider.awareness.getStates())
       this.users = this.awareness
       this.total = this.awareness.size
-      this.$emit('update:dataUsers', this.users);
     })
     this.provider.on('status', evt => {
       if (evt.status === 'disconnected') {
@@ -91,6 +169,35 @@ export default {
     })
   },
   methods: {
+    getMenuCoords() {
+      const coord = GetTopLevelBlockCoords(this.editor.view)
+      const val = coord.left - 12
+      const updatedCoord = {
+        bottom: coord.bottom,
+        height: coord.height,
+        left: val,
+        right: coord.right,
+        top: coord.top,
+        width: coord.width,
+        x: coord.x,
+        y: coord.y,
+      }
+      return updatedCoord
+    },
+    getTopLevelNodeType() {
+      // this.isLink = this.editor.view.state.selection.$head.parent.content.content[0]?.marks[0]?.type.name === 'link'
+      console.log('type: ', GetTopLevelNode(this.editor.view)?.type.name)
+      return GetTopLevelNode(this.editor.view)?.type.name
+    },
+    updateToolbar() {
+      this.topLevelNodeType = this.getTopLevelNodeType()
+    },
+    getCurrentBlockTool() {
+      return this.allBlockTools.find(
+        tool => tool.name == this.topLevelNodeType
+          || tool.tools?.find(tool => tool.name == this.topLevelNodeType),
+      )
+    },
     filterUsers(dataMap) {
       const mapBaru = new Map()
       for (const [key, value] of dataMap) {
@@ -98,9 +205,14 @@ export default {
         if (!mapBaru.has(userId)) {
           mapBaru.set(userId, value)
         }
+
       }
       return mapBaru
-    }, gantiNama() {
+    },
+    shouldShowMainToolbar() {
+      return this.editor.isActive()
+    },
+    gantiNama() {
       const name = (window.prompt('Name') || '')
         .trim()
         .substring(0, 32)
@@ -147,7 +259,7 @@ export default {
     this.provider = new TiptapCollabProvider({
       appId: 'jkv85lmx', // get this at collab.tiptap.dev
       name: 'collabDocs', // e.g. a uuid uuidv4();
-      token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2OTk5NzI3OTUsIm5iZiI6MTY5OTk3Mjc5NSwiZXhwIjoxNzAwMDU5MTk1LCJpc3MiOiJodHRwczovL2NvbGxhYi50aXB0YXAuZGV2IiwiYXVkIjoiYnJvc2ZhbmR5QGdtYWlsLmNvbSJ9.tnlk2YqA-lJ88zMq3omA0gjSARvF--SrsrxrjDeoNIw', // see "Authentication" below
+      token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MDAwNTk0NTUsIm5iZiI6MTcwMDA1OTQ1NSwiZXhwIjoxNzAwMTQ1ODU1LCJpc3MiOiJodHRwczovL2NvbGxhYi50aXB0YXAuZGV2IiwiYXVkIjoiYnJvc2ZhbmR5QGdtYWlsLmNvbSJ9.puFExGHynTg3yeW2FORID7vuYk4Gb3nN06TPPkSH4Wk', // see "Authentication" below
       document: ydoc // pass your existing doc, or leave this out and use provider.document
     });
 

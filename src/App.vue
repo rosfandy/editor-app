@@ -1,26 +1,17 @@
 <template>
-  <h1>Testing2</h1>
-  <Editor />
+  <router-view />
 </template>
+<style></style>  
 
 <script>
-import Editor from './components/editor.vue'
+// import Editor from './components/editor.vue'
 
 export default {
   name: 'App',
   components: {
-    Editor
+    // Editor
   }
 }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+<style></style>
