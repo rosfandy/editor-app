@@ -172,5 +172,28 @@ export default {
 </script>
 
 <style>
-@import "style.css"
-</style>
+h1 {
+  font-size: 2.25rem;
+  /* 36px */
+  line-height: 2.5rem;
+  /* 40px */
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.875rem;
+  /* 30px */
+  line-height: 2.25rem;
+  /* 36px */
+  font-weight: 700;
+}
+
+h3 {
+  font-size: 1.5rem;
+  /* 24px */
+  line-height: 2rem;
+  /* 32px */
+  font-weight: 700;
+}
+
+@import "style.css"</style>
