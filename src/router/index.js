@@ -1,11 +1,13 @@
+/* eslint-disable no-unused-vars */
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/view/Home.vue'
 import Editor from '@/view/Editor.vue'
 const routes = [
     {
         path: '/',
-        name: 'Home',
-        component: Home
+        redirect: 'editor'
+        // name: 'Home',
+        // component: Home
     },
     {
         path: '/editor',
