@@ -259,7 +259,7 @@ export default {
     this.provider = new TiptapCollabProvider({
       appId: 'jkv85lmx', // get this at collab.tiptap.dev
       name: 'collabDocs', // e.g. a uuid uuidv4();
-      token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MDAwNTk0NTUsIm5iZiI6MTcwMDA1OTQ1NSwiZXhwIjoxNzAwMTQ1ODU1LCJpc3MiOiJodHRwczovL2NvbGxhYi50aXB0YXAuZGV2IiwiYXVkIjoiYnJvc2ZhbmR5QGdtYWlsLmNvbSJ9.puFExGHynTg3yeW2FORID7vuYk4Gb3nN06TPPkSH4Wk', // see "Authentication" below
+      token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MjQ2MzEwMTEsIm5iZiI6MTcyNDYzMTAxMSwiZXhwIjoxNzI0NzE3NDExLCJpc3MiOiJodHRwczovL2Nsb3VkLnRpcHRhcC5kZXYiLCJhdWQiOiJqa3Y4NWxteCJ9.sMF6O2d5jR-62lveE8eQpKQXq2x_1eagKu0ac3KlLd8', // see "Authentication" below
       document: ydoc // pass your existing doc, or leave this out and use provider.document
     });
 
