@@ -9,7 +9,7 @@
 
         </div>
         <div v-if="users" class="flex max-w-[50%] flex-nowrap">
-            <div v-for="(item, index) in  users " :key="index"
+            <div v-for="(item, index) in users " :key="index"
                 :class="item ? `flex items-center bg-white border rounded-[50%] p-1 ` : ''"
                 :style="{ 'margin-left': '-14px', 'z-index': 10 - index }">
                 <div class="" :user-tooltip="index === 0 ? 'Me' : item[1].user.name">

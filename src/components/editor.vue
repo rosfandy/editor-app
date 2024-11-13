@@ -165,7 +165,7 @@ export default {
       } else {
         this.status = evt.status
       }
-      console.log('status: ', evt.status)
+      console.log('status: ', evt)
     })
   },
   methods: {
@@ -185,7 +185,6 @@ export default {
       return updatedCoord
     },
     getTopLevelNodeType() {
-      // this.isLink = this.editor.view.state.selection.$head.parent.content.content[0]?.marks[0]?.type.name === 'link'
       console.log('type: ', GetTopLevelNode(this.editor.view)?.type.name)
       return GetTopLevelNode(this.editor.view)?.type.name
     },
@@ -257,12 +256,11 @@ export default {
   },
   created() {
     this.provider = new TiptapCollabProvider({
-      appId: 'jkv85lmx', // get this at collab.tiptap.dev
-      name: 'collabDocs', // e.g. a uuid uuidv4();
-      token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MjQ2MzE2MDksIm5iZiI6MTcyNDYzMTYwOSwiZXhwIjoxNzI0NzE4MDA5LCJpc3MiOiJodHRwczovL2Nsb3VkLnRpcHRhcC5kZXYiLCJhdWQiOiJqa3Y4NWxteCJ9.pJCAq_9PFQY9w_P9_ZCCSZ8F48nuyMausbKN8qAcY5U', // see "Authentication" below
-      document: ydoc // pass your existing doc, or leave this out and use provider.document
+      appId: 'rm8dg4lk',
+      name: 'collabDocs',
+      token: `eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzE1Mzg4MDAsIm5iZiI6MTczMTUzODgwMCwiZXhwIjoxNzMxNjI1MjAwLCJpc3MiOiJodHRwczovL2Nsb3VkLnRpcHRhcC5kZXYiLCJhdWQiOiJiYzcxNTdhNS0yNjEzLTQyNmYtYjI1MC0xMDU1YzIyYjJhN2YifQ.G9Ouk1MhQo5A_aQ7BrDty31qcoOXPB4N6aWiw7swFvg`,
+      document: ydoc
     });
-
   },
   beforeUnmount() {
     this.editor.destroy()
